@@ -1,9 +1,11 @@
+import org.scijava.java3d.Canvas3D;
+import org.scijava.java3d.utils.universe.SimpleUniverse;
 import world.World;
 
 import java.awt.*;
 import java.awt.image.BufferStrategy;
 
-public class Game extends Canvas implements Runnable {
+public class Game extends Canvas3D implements Runnable {
 	
 	private final Settings settings;
 	
@@ -16,8 +18,9 @@ public class Game extends Canvas implements Runnable {
 	public int lastFrames = 0, lastUpdates = 0;
 	
 	public Game() {
+		super(SimpleUniverse.getPreferredConfiguration());
 		settings = new Settings();
-		world = new World(1024, 1024, 64);
+		world = new World(this, 3, 8);
 		gui = new GUI(this, settings);
 		new Window(settings.width, settings.height, "Test", this);
 		start();
@@ -26,7 +29,7 @@ public class Game extends Canvas implements Runnable {
 	@Override
 	public void run() {
 		long lastTime = System.nanoTime();
-		double amountOfTicks = 30.0;
+		double amountOfTicks = 256.0;
 		double ns = 1000000000 / amountOfTicks;
 		double delta = 0;
 		long timer = System.currentTimeMillis();
@@ -71,7 +74,7 @@ public class Game extends Canvas implements Runnable {
 		}
 	}
 	
-	public void render() {
+	public synchronized void render() {
 		
 		BufferStrategy bs = getBufferStrategy();
 		if (bs == null) {
@@ -82,11 +85,11 @@ public class Game extends Canvas implements Runnable {
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 0, getWidth(), getHeight());
 		
+		// Render world
+		world.render();
+		
 		// Render GUI
 		gui.render((Graphics2D) g.create());
-		
-		// Render world
-		world.render((Graphics2D) g.create());
 		
 		g.dispose();
 		bs.show();

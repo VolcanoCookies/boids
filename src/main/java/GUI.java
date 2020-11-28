@@ -1,16 +1,14 @@
-import entity.Renderable;
-import entity.Tickable;
-
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class GUI implements Tickable,
-		Renderable {
+public class GUI {
 	
 	private final Game game;
 	
 	private final Settings settings;
 	
-	private String information = "";
+	private String[] information = new String[0];
 	
 	private int xOffset = 0;
 	
@@ -19,24 +17,22 @@ public class GUI implements Tickable,
 		this.settings = settings;
 	}
 	
-	@Override
 	public void render(Graphics2D g) {
 		g.setColor(Color.BLACK);
-		g.drawString(information, (float) g.getDeviceConfiguration().getBounds().getMaxX(), 2);
+		for (int i = 0; i < information.length; i++) {
+			g.drawString(information[i], 2, 14 * (i + 1));
+		}
 	}
 	
-	@Override
 	public void tick() {
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("FPS: ");
-		stringBuilder.append(game.lastFrames);
-		stringBuilder.append("\nTicks: ");
-		stringBuilder.append(game.lastUpdates);
+		List<String> list = new ArrayList<>();
+		list.add("FPS: " + game.lastFrames);
+		list.add("TPS: " + game.lastUpdates);
 		if (settings.tickPaused) {
-			stringBuilder.append("\nTicks paused");
+			list.add("Paused");
 		}
 		
-		information = stringBuilder.toString();
+		information = list.toArray(new String[0]);
 	}
 	
 }

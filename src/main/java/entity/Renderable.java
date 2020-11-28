@@ -1,9 +1,9 @@
 package entity;
 
-import java.awt.*;
+import org.scijava.java3d.BranchGroup;
 
 public interface Renderable {
 	
-	void render(Graphics2D g);
+	void render(BranchGroup branchGroup);
 	
 }
