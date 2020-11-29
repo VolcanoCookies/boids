@@ -1,3 +1,5 @@
+package net.volcano;
+
 public class Settings {
 	
 	int tickRate = 64;

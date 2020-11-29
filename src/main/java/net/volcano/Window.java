@@ -1,3 +1,5 @@
+package net.volcano;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -12,7 +14,7 @@ public class Window {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(false);
 		frame.setLocationRelativeTo(null);
-		frame.add(game);
+		//frame.add(game);
 		frame.setVisible(true);
 		
 		game.start();
