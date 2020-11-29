@@ -1,13 +1,13 @@
-import org.scijava.java3d.Canvas3D;
-import org.scijava.java3d.utils.universe.SimpleUniverse;
-import world.World;
+package net.volcano;
+
+import net.volcano.world.World;
 
 import java.awt.*;
 import java.awt.image.BufferStrategy;
 
-public class Game extends Canvas3D implements Runnable {
+public class Game extends Canvas implements Runnable {
 	
-	private final Settings settings;
+	public static final Settings settings = new Settings();
 	
 	private Thread thread;
 	
@@ -15,27 +15,30 @@ public class Game extends Canvas3D implements Runnable {
 	
 	private final GUI gui;
 	
+	private final Input input;
+	
 	public int lastFrames = 0, lastUpdates = 0;
 	
 	public Game() {
-		super(SimpleUniverse.getPreferredConfiguration());
-		settings = new Settings();
-		world = new World(this, 3, 8);
-		gui = new GUI(this, settings);
+		
+		world = new World();
+		input = new Input(this);
+		gui = new GUI(this, input);
+		
 		new Window(settings.width, settings.height, "Test", this);
+		
 		start();
 	}
 	
 	@Override
 	public void run() {
 		long lastTime = System.nanoTime();
-		double amountOfTicks = 256.0;
-		double ns = 1000000000 / amountOfTicks;
 		double delta = 0;
 		long timer = System.currentTimeMillis();
 		int updates = 0;
 		int frames = 0;
 		while (settings.running) {
+			double ns = 1000000000d / settings.tickRate;
 			long now = System.nanoTime();
 			delta += (now - lastTime) / ns;
 			lastTime = now;
@@ -85,11 +88,16 @@ public class Game extends Canvas3D implements Runnable {
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 0, getWidth(), getHeight());
 		
+		Graphics2D guiGraphics = (Graphics2D) g.create();
+		
+		g.translate(settings.xOffset, settings.yOffset);
+		g.scale(settings.scale, settings.scale);
+		
 		// Render world
-		world.render();
+		world.render((Graphics2D) g.create());
 		
 		// Render GUI
-		gui.render((Graphics2D) g.create());
+		gui.render(guiGraphics);
 		
 		g.dispose();
 		bs.show();
@@ -100,6 +108,8 @@ public class Game extends Canvas3D implements Runnable {
 		// Tick graphics
 		gui.tick();
 		// Tick world
-		world.tick();
+		if (!settings.tickPaused) {
+			world.tick();
+		}
 	}
 }

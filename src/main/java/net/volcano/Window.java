@@ -1,3 +1,5 @@
+package net.volcano;
+
 import javax.swing.*;
 import java.awt.*;
 

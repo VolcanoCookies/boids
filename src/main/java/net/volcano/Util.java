@@ -1,3 +1,5 @@
+package net.volcano;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -22,6 +24,15 @@ public class Util {
 			booleans[i] = matrix.get(i).toArray(new Boolean[0]);
 		}
 		return booleans;
+	}
+	
+	public static boolean arrayContains(int[] a, int i) {
+		for (int e : a) {
+			if (e == i) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 }
