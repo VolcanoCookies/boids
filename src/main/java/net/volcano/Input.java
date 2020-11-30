@@ -11,8 +11,6 @@ public class Input implements KeyListener,
 	
 	private final Game game;
 	
-	private int prevX, prevY;
-	
 	public Input(Game game) {
 		this.game = game;
 		
@@ -43,6 +41,9 @@ public class Input implements KeyListener,
 				settings.yOffset = 0;
 				settings.scale = 1.0;
 			}
+			case KeyEvent.VK_ESCAPE -> {
+				System.exit(0);
+			}
 		}
 	}
 	
@@ -56,15 +57,21 @@ public class Input implements KeyListener,
 	
 	}
 	
+	private boolean pressed = false;
+	
 	@Override
 	public void mousePressed(MouseEvent e) {
-		prevX = e.getX();
-		prevY = e.getY();
+		pressed = true;
+		if (settings.tickPaused) {
+			if (Game.hoveringCell != null) {
+				Game.hoveringCell.setState(!Game.hoveringCell.alive);
+			}
+		}
 	}
 	
 	@Override
 	public void mouseReleased(MouseEvent e) {
-	
+		pressed = false;
 	}
 	
 	@Override
@@ -82,26 +89,26 @@ public class Input implements KeyListener,
 		settings.scale -= e.getWheelRotation() * 0.1;
 	}
 	
+	private int prevCellX, prevCellY;
+	
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		settings.xOffset += e.getX() - prevX;
-		settings.yOffset += e.getY() - prevY;
+		if (!settings.tickPaused) {
+			settings.xOffset += e.getX() - Game.mouseX;
+			settings.yOffset += e.getY() - Game.mouseY;
+		}
 		
-		prevX = e.getX();
-		prevY = e.getY();
+		if (settings.tickPaused && pressed) {
+			Game.hoveringCell.setState(true);
+		}
+		
+		Game.mouseX = e.getX();
+		Game.mouseY = e.getY();
 	}
 	
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		prevX = e.getX();
-		prevY = e.getY();
-	}
-	
-	public int getPrevX() {
-		return prevX;
-	}
-	
-	public int getPrevY() {
-		return prevY;
+		Game.mouseX = e.getX();
+		Game.mouseY = e.getY();
 	}
 }

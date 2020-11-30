@@ -48,6 +48,37 @@ public class World {
 		g.fillRect(settings.width * settings.cellSize, -settings.cellSize * 2, settings.cellSize * 2, (settings.height + 4) * settings.cellSize);
 		g.fillRect(-settings.cellSize * 2, settings.height * settings.cellSize, (settings.width + 4) * settings.cellSize, settings.cellSize * 2);
 		
+		if (settings.enableCopyingToEdges) {
+			
+			g.translate(0, settings.height * settings.cellSize);
+			
+			Arrays.stream(cells)
+					.parallel()
+					.flatMap(Arrays::stream)
+					.forEach(c -> c.render((Graphics2D) g.create()));
+			
+			g.translate(0, -settings.height * settings.cellSize * 2);
+			
+			Arrays.stream(cells)
+					.parallel()
+					.flatMap(Arrays::stream)
+					.forEach(c -> c.render((Graphics2D) g.create()));
+			
+			g.translate(settings.width * settings.cellSize, settings.height * settings.cellSize);
+			
+			Arrays.stream(cells)
+					.parallel()
+					.flatMap(Arrays::stream)
+					.forEach(c -> c.render((Graphics2D) g.create()));
+			
+			g.translate(-settings.width * settings.cellSize * 2, 0);
+			
+			Arrays.stream(cells)
+					.parallel()
+					.flatMap(Arrays::stream)
+					.forEach(c -> c.render((Graphics2D) g.create()));
+			
+		}
 	}
 	
 	public synchronized void tick() {

@@ -17,6 +17,8 @@ public class Window {
 		frame.add(game);
 		frame.setVisible(true);
 		
+		game.requestFocus();
+		
 		game.start();
 	}
 }

@@ -49,13 +49,29 @@ public class Cell implements Tickable,
 		Cell[][] cells = world.getCells();
 		
 		int living = 0;
-		for (int[] disp : DISPLACEMENTS) {
-			if (disp[0] + x < cells.length && disp[0] + x > -1 &&
-					disp[1] + y < cells[disp[0] + x].length && disp[1] + y > -1) {
-				if (cells[x + disp[0]][y + disp[1]].alive) {
+		for (int x = -1; x < 2; x++) {
+			for (int y = -1; y < 2; y++) {
+				int nX = x + this.x;
+				int nY = y + this.y;
+				if (nX < 0) {
+					nX += settings.width;
+				}
+				if (nX >= settings.width) {
+					nX -= settings.width;
+				}
+				if (nY < 0) {
+					nY += settings.height;
+				}
+				if (nY >= settings.height) {
+					nY -= settings.height;
+				}
+				if (cells[nX][nY].alive) {
 					living++;
 				}
 			}
+		}
+		if (living > 0 && alive) {
+			living--;
 		}
 		
 		if (!alive && Util.arrayContains(settings.parentsNeeded, living)) {
@@ -71,11 +87,19 @@ public class Cell implements Tickable,
 	public void update() {
 		if (alive && age < 1) {
 			nAlive = false;
-		} else if (!alive && nAlive) {
-			age = settings.initialAge;
 		}
 		
-		alive = nAlive;
+		setState(nAlive);
+	}
+	
+	public void setState(boolean alive) {
+		if (!this.alive && alive) {
+			age = settings.initialAge;
+		} else if (this.alive && !alive) {
+			age = 0;
+		}
+		this.alive = alive;
+		nAlive = alive;
 	}
 	
 }

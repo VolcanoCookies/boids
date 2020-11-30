@@ -1,5 +1,7 @@
 package net.volcano;
 
+import net.volcano.world.World;
+
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -9,15 +11,19 @@ public class GUI {
 	
 	private static final Settings settings = Game.settings;
 	
+	private static final Statistics statistics = Game.statistics;
+	
 	private final Game game;
 	
-	private final Input input;
+	private final World world;
 	
 	private String[] information = new String[0];
 	
-	public GUI(Game game, Input input) {
+	private int worldX, worldY;
+	
+	public GUI(Game game, World world) {
 		this.game = game;
-		this.input = input;
+		this.world = world;
 	}
 	
 	public void render(Graphics2D g) {
@@ -35,20 +41,36 @@ public class GUI {
 			g.scale(settings.scale, settings.scale);
 			
 			g.setColor(Color.GREEN);
-			g.fillRect(input.getPrevX(),
-					input.getPrevY(),
+			
+			g.fillRect(worldX * settings.cellSize, worldY * settings.cellSize, settings.cellSize, settings.cellSize);
+			
+			/*g.fillRect(input.getPrevX() - settings.xOffset,
+					input.getPrevY() - settings.yOffset,
 					settings.cellSize,
-					settings.cellSize);
+					settings.cellSize);*/
 		}
 		
 	}
 	
 	public void tick() {
 		List<String> list = new ArrayList<>();
-		list.add("FPS: " + game.lastFrames);
-		list.add("TPS: " + game.lastUpdates);
+		list.add("FPS: " + statistics.framesPerSecond);
+		list.add("TPS: " + statistics.ticksPerSecond);
 		if (settings.tickPaused) {
 			list.add("Paused");
+		}
+		
+		worldX = Math.floorDiv((int) ((Game.mouseX - settings.xOffset) / settings.scale), settings.cellSize);
+		worldY = Math.floorDiv((int) ((Game.mouseY - settings.yOffset) / settings.scale), settings.cellSize);
+		
+		list.add("X: " + worldX);
+		list.add("Y: " + worldY);
+		
+		if (worldX >= 0 && worldX < settings.width &&
+				worldY >= 0 && worldY < settings.height) {
+			Game.hoveringCell = world.getCells()[worldX][worldY];
+		} else {
+			Game.hoveringCell = null;
 		}
 		
 		information = list.toArray(new String[0]);

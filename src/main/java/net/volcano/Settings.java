@@ -2,7 +2,7 @@ package net.volcano;
 
 public class Settings {
 	
-	public int tickRate = 64;
+	public int tickRate = 128;
 	
 	public boolean tickPaused = false;
 	
@@ -25,5 +25,7 @@ public class Settings {
 	public double scale = 1.0;
 	
 	public int xOffset = 0, yOffset = 0;
+	
+	public boolean enableCopyingToEdges = false;
 	
 }

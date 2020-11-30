@@ -1,13 +1,20 @@
 package net.volcano;
 
+import net.volcano.entity.Cell;
 import net.volcano.world.World;
 
 import java.awt.*;
 import java.awt.image.BufferStrategy;
 
-public class Game extends Canvas implements Runnable {
+public class Game extends Canvas {
 	
 	public static final Settings settings = new Settings();
+	
+	public static final Statistics statistics = new Statistics();
+	
+	public static int mouseX, mouseY;
+	
+	public static Cell hoveringCell;
 	
 	private Thread thread;
 	
@@ -19,59 +26,79 @@ public class Game extends Canvas implements Runnable {
 	
 	public int lastFrames = 0, lastUpdates = 0;
 	
+	private Thread tickThread;
+	
+	private Thread renderThread;
+	
 	public Game() {
 		
 		world = new World();
 		input = new Input(this);
-		gui = new GUI(this, input);
+		gui = new GUI(this, world);
 		
 		new Window(settings.width, settings.height, "Test", this);
 		
 		start();
 	}
 	
-	@Override
-	public void run() {
-		long lastTime = System.nanoTime();
-		double delta = 0;
-		long timer = System.currentTimeMillis();
-		int updates = 0;
-		int frames = 0;
-		while (settings.running) {
-			double ns = 1000000000d / settings.tickRate;
-			long now = System.nanoTime();
-			delta += (now - lastTime) / ns;
-			lastTime = now;
-			while (delta >= 1) {
-				tick();
-				updates++;
-				delta--;
-			}
-			render();
-			frames++;
-			
-			if (System.currentTimeMillis() - timer > 1000) {
-				timer += 1000;
-				lastUpdates = updates;
-				lastFrames = frames;
-				frames = 0;
-				updates = 0;
-			}
-		}
-		stop();
-	}
-	
 	public synchronized void start() {
 		settings.running = true;
-		thread = new Thread(this);
-		thread.start();
+		
+		tickThread = new Thread(() -> {
+			
+			long lastTime = System.nanoTime();
+			double delta = 0;
+			long timer = System.currentTimeMillis();
+			int updates = 0;
+			while (settings.running) {
+				double ns = 1000000000d / settings.tickRate;
+				long now = System.nanoTime();
+				delta += (now - lastTime) / ns;
+				lastTime = now;
+				while (delta >= 1) {
+					tick();
+					updates++;
+					delta--;
+				}
+				
+				if (System.currentTimeMillis() - timer > 1000) {
+					timer += 1000;
+					statistics.ticksPerSecond = updates;
+					updates = 0;
+				}
+			}
+			stop();
+			
+		});
+		tickThread.start();
+		
+		renderThread = new Thread(() -> {
+			
+			long timer = System.currentTimeMillis();
+			int frames = 0;
+			while (settings.running) {
+				
+				render();
+				frames++;
+				
+				if (System.currentTimeMillis() - timer > 1000) {
+					timer += 1000;
+					statistics.framesPerSecond = frames;
+					frames = 0;
+				}
+			}
+			stop();
+			
+		});
+		renderThread.start();
 	}
 	
 	public synchronized void stop() {
 		settings.running = false;
 		try {
-			thread.join();
-			System.out.println("Game thread stopped");
+			tickThread.join();
+			renderThread.join();
+			System.out.println("Game threads stopped");
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
